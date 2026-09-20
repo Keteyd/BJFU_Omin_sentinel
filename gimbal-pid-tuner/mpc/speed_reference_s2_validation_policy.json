@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "status": "FROZEN_BEFORE_S2_COLLECTION",
+  "frozen_at": "2026-09-12",
+  "firmware_build": "0x59490702",
+  "trace_version": 5,
+  "S1_raw_sha256": "DBA1F7313934AAA8A6D57F958BF4A33F5B10B9BD1E68C039B36FFB51E02C7B8D",
+  "excitation_plan_sha256": "64E23589DE5FBE5E6673349BBABE4B709FC45B89C3016C1A64A7FAFEC1D46BAC",
+  "frozen_model_report": "NoMachineTemp/speed-reference-model-59490702-s1/report.json",
+  "frozen_model_report_sha256": "1E81D3F94F3C81E3CE5A9A04481AABFCFE0270A8753BC4D3CE2C7A7725A2D53D",
+  "identification_script_sha256": "52E08E2386B0DAF53026B5C0EC3100D95A5DCC4DC6DE61EC7B4A1E4DC8A1AB52",
+  "validation_script_sha256": "6A47432145FFF3F14E23B765BFCE2049244225BB6D60FD6A2749957C5AEA8B2B",
+  "model": {
+    "sample_period_ms": 20,
+    "outputs": [
+      "big_motor_speed_dps",
+      "small_inertial_heading_rate_dps"
+    ],
+    "output_lags": 2,
+    "reference_lags": 4,
+    "reference_delay_samples": 0,
+    "ridge": 0.001,
+    "autonomous_spectral_radius": 0.8928523927387599
+  },
+  "S2_primary_gate": {
+    "window_s": [3, 31],
+    "rolling_horizon_ms": 200,
+    "minimum_improvement_over_hold_fraction": {
+      "big_motor_speed_dps": 0.2,
+      "small_inertial_heading_rate_dps": 0.5
+    },
+    "maximum_rmse_dps": {
+      "big_motor_speed_dps": 6.0,
+      "small_inertial_heading_rate_dps": 6.0
+    },
+    "data_quality": {
+      "download_complete": true,
+      "quality_issues": [],
+      "crc_errors": 0,
+      "terminal_phase": 5,
+      "terminal_reason": 0,
+      "maximum_record_shortfall": 5,
+      "full_duration_timing_accepted": true,
+      "firmware_stream_quality_latched": false,
+      "CAN_failed_errors_aborted": 0
+    }
+  },
+  "secondary_report_only_horizons_ms": [100, 500],
+  "immutability_rule": "After any S2 sample is viewed, do not change coefficients, scales, structure, resampling, polarity, thresholds or primary window.",
+  "pass_interpretation": "Validation of the retained PID closed-loop speed-reference predictor only; no voltage/current-to-mechanics claim and no hardware takeover.",
+  "hardware_takeover_allowed": false
+}

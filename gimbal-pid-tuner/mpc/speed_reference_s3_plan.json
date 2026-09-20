@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "status": "FROZEN_BEFORE_S3_COLLECTION",
+  "purpose": "prospective independent confirmation of the unchanged S1 closed-loop speed-reference model after S2 failed only its frozen raw-count data gate",
+  "planned_firmware_build": "0x59490801",
+  "trace_version": 5,
+  "sample_period_ms": 4,
+  "duration_ms": 36000,
+  "nominal_records": 9001,
+  "segments_ms": {
+    "baseline": [0, 3000],
+    "excitation": [3000, 31000],
+    "settle": [31000, 36000]
+  },
+  "controller_interface": {
+    "big": "direct big motor-speed reference through the retained big speed PID",
+    "small": "direct small inertial-yaw-rate reference through the retained small speed PID",
+    "bypassed": ["big angle PID", "small angle PID"],
+    "retained": ["both speed PIDs", "effort clamps", "small-joint absolute and relative travel guards"]
+  },
+  "waveform": {
+    "definition": "analytic derivative of sin(pi*t/T)^2 times a multisine position primitive",
+    "drive_duration_s": 28.0,
+    "reference_units": "degrees_per_second",
+    "big": {
+      "peak_budget_dps": 30.0,
+      "designed_peak_dps": 29.5,
+      "harmonics": [9, 21, 43, 73],
+      "frequencies_hz": [0.3214285714, 0.75, 1.5357142857, 2.6071428571],
+      "primitive_amplitude_deg": [2.9025746, 2.2617464, 1.2150312, 0.3903836],
+      "phase_rad": [0.9650392, 4.5401046, 2.7112651, 1.3533682]
+    },
+    "small": {
+      "peak_budget_dps": 60.0,
+      "designed_peak_dps": 59.0,
+      "harmonics": [10, 27, 53, 91],
+      "frequencies_hz": [0.3571428571, 0.9642857143, 1.8928571429, 3.25],
+      "primitive_amplitude_deg": [5.1704974, 3.4818164, 1.9511311, 0.6714932],
+      "phase_rad": [0.4001477, 4.6934328, 6.2240131, 0.1600084]
+    },
+    "frequency_separation_rule": "all eight S3 harmonics are mutually distinct and none occurs in any S1 or S2 axis",
+    "phase_selection_rule": "selected using reference-only travel, acceleration and RMS objectives; no S3 measurement exists"
+  },
+  "unchanged_frozen_model": {
+    "report": "NoMachineTemp/speed-reference-model-59490702-s1/report.json",
+    "report_sha256": "1E81D3F94F3C81E3CE5A9A04481AABFCFE0270A8753BC4D3CE2C7A7725A2D53D",
+    "source_S1_raw_sha256": "DBA1F7313934AAA8A6D57F958BF4A33F5B10B9BD1E68C039B36FFB51E02C7B8D",
+    "sample_period_ms": 20,
+    "structure": {
+      "output_lags": 2,
+      "reference_lags": 4,
+      "reference_delay_samples": 0,
+      "ridge": 0.001
+    },
+    "autonomous_spectral_radius": 0.8928523927387599,
+    "immutability": "S2 is not used to refit or rescale the model; no coefficient, scale, structure, polarity, window or numerical threshold may change after this S3 plan is frozen"
+  },
+  "prospective_S3_acceptance_gate": {
+    "data_quality": {
+      "download_complete": true,
+      "error": null,
+      "crc_errors": 0,
+      "terminal_phase": 5,
+      "terminal_reason": 0,
+      "firmware_stream_quality_latched": false,
+      "feedback_failure": null,
+      "in_stream_discarded_wire_bytes": 0,
+      "CAN_both_axes": {
+        "counter_saturated": false,
+        "failed": 0,
+        "errors": 0,
+        "aborted": 0,
+        "incomplete_coverage_intervals_after_first": 0
+      },
+      "time_domain_coverage": {
+        "first_trace_us_maximum": 10000,
+        "last_trace_us_minimum": 36000000,
+        "last_trace_us_maximum": 36010000,
+        "trace_span_us_minimum": 35990000,
+        "terminal_elapsed_ms_minimum": 36000,
+        "terminal_elapsed_ms_maximum": 36001,
+        "source_interval_us_strictly_positive": true,
+        "source_interval_us_maximum": 10000,
+        "active_20ms_grid_start_s": 3.0,
+        "active_20ms_grid_end_s": 31.0,
+        "active_grid_requires_samples_on_both_sides": true,
+        "maximum_nearest_sample_distance_each_side_us": 10000
+      },
+      "raw_record_count_policy": "diagnostic only; no minimum count or shortfall threshold when every explicit time-domain coverage condition passes",
+      "permitted_generic_quality_labels": ["sample_count_not_9001", "irregular_sample_interval"],
+      "all_other_quality_labels_rejected": true
+    },
+    "model_quality": {
+      "primary_window_s": [3.0, 31.0],
+      "primary_horizon_ms": 200,
+      "minimum_improvement_over_hold_fraction": {
+        "big_motor_speed_dps": 0.2,
+        "small_inertial_heading_rate_dps": 0.5
+      },
+      "maximum_rmse_dps": {
+        "big_motor_speed_dps": 6.0,
+        "small_inertial_heading_rate_dps": 6.0
+      },
+      "report_only_horizons_ms": [100, 500],
+      "pass_rule": "all explicit data-quality and all four 200 ms numerical conditions must pass"
+    }
+  },
+  "experiment_policy": {
+    "S1_and_S2_must_not_be_repeated": true,
+    "S3_may_be_collected_once": true,
+    "S3_must_not_be_used_to_change_its_own_model_or_gate": true,
+    "S3_pass_interpretation": "independent confirmation of the retained-PID closed-loop speed-reference predictor only",
+    "hardware_takeover_allowed": false
+  }
+}

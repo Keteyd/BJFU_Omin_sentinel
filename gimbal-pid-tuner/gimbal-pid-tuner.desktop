@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Gimbal PID Tuner
+Comment=Small-yaw PID serial tuning console
+Exec=/usr/bin/google-chrome --app=file:///home/nuc11--02/gimbal-pid-tuner/index.html
+Icon=utilities-system-monitor
+Terminal=false
+Categories=Development;Utility;
+StartupNotify=true

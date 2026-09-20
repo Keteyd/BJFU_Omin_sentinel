@@ -1,0 +1,124 @@
+{
+  "status": "OPERATOR_REQUESTED_FIELD_REBALANCE_DIAGNOSTIC",
+  "build": "0x59490905",
+  "model_report": "E:\\Project_and_learn\\BJFU_Omin_sentinel\\NoMachineTemp\\speed-reference-model-59490702-s1\\report.json",
+  "model_report_sha256": "1E81D3F94F3C81E3CE5A9A04481AABFCFE0270A8753BC4D3CE2C7A7725A2D53D",
+  "model_scope": "closed-loop speed-reference predictor with existing speed PIDs retained; not a voltage/current-to-mechanics plant",
+  "controller": {
+    "sample_period_ms": 20,
+    "prediction_horizon_steps": 15,
+    "first_move_feedback_gain": [
+      [
+        -2.6898318185013594,
+        -2.707819896163139,
+        0.04688564151657222,
+        0.030247608623082744,
+        -0.005371653967289584,
+        0.0013221554012820703,
+        -0.7277919078083115,
+        -0.018241113595254314,
+        -0.02078065402694717,
+        -0.008502949230861409,
+        0.016570319450762573,
+        0.0014637614509641183,
+        -0.45456591370911037,
+        -0.0009551230280822676
+      ],
+      [
+        -15.301755942972898,
+        1.4568666917261899,
+        0.011545954297546318,
+        0.6982246268456783,
+        -0.003060057769378854,
+        0.10288152643091562,
+        -0.06366564649312836,
+        -0.5466611956109761,
+        0.007215379533426254,
+        -0.2046316893942582,
+        0.0658121837068395,
+        -0.09995694673042392,
+        -0.9704465322195058,
+        -0.025140316721950214
+      ]
+    ],
+    "weights": {
+      "heading_error": 300.0,
+      "small_joint": 30.0,
+      "rate_deviation_each": 0.02,
+      "reference": [
+        0.16,
+        0.02
+      ],
+      "reference_delta": [
+        2.0,
+        0.5
+      ]
+    },
+    "limits": {
+      "speed_reference_abs_dps": null,
+      "speed_reference_delta_per_20ms_dps": null,
+      "target_heading_rate_internal_clamp_dps": null,
+      "reference_joint_envelope_deg": [
+        -53.677734375,
+        26.080078125
+      ],
+      "speed_pid_effort_limits": [
+        30.0,
+        6.0
+      ]
+    },
+    "dynamic_closed_loop_spectral_radius": 0.9074256236939899
+  },
+  "zero_history_first_moves": [
+    {
+      "heading_error_deg": 0.5,
+      "reference_dps": [
+        1.345871032278762,
+        7.676018288208399
+      ]
+    },
+    {
+      "heading_error_deg": 1.0,
+      "reference_dps": [
+        2.6907869415294416,
+        15.326896259694848
+      ]
+    },
+    {
+      "heading_error_deg": 5.0,
+      "reference_dps": [
+        13.45011421553488,
+        76.53392003158643
+      ]
+    },
+    {
+      "heading_error_deg": 10.0,
+      "reference_dps": [
+        26.899273308041675,
+        153.04269974645092
+      ]
+    },
+    {
+      "heading_error_deg": 30.0,
+      "reference_dps": [
+        80.69590967806886,
+        459.0778186059089
+      ]
+    }
+  ],
+  "change_from_59490904": {
+    "small_joint_weight": [
+      100.0,
+      30.0
+    ],
+    "big_reference_delta_weight": [
+      0.5,
+      2.0
+    ],
+    "small_reference_delta_weight": [
+      0.5,
+      0.5
+    ],
+    "speed_limit_policy": "unchanged: no ordinary MPC speed or slew clamp"
+  }
+}

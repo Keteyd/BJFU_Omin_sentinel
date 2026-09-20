@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Small Yaw PID Tuner</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Inter, "Segoe UI", "Microsoft YaHei", sans-serif;
+      color: #17202a;
+      background: #eef1f3;
+      letter-spacing: 0;
+    }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; max-width: 100%; overflow-x: hidden; }
+    body { margin: 0; min-width: 320px; }
+    button, input { font: inherit; }
+    header {
+      height: 58px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      color: #f7faf9;
+      background: #20272b;
+      border-bottom: 3px solid #2e8b70;
+    }
+    h1 { margin: 0; font-size: 18px; font-weight: 650; }
+    .connection { display: flex; align-items: center; gap: 10px; }
+    .status { font-size: 13px; color: #bdc7c3; white-space: nowrap; }
+    .status.online { color: #70d8a7; }
+    button {
+      min-height: 34px;
+      padding: 6px 12px;
+      border: 1px solid #9ba7ad;
+      border-radius: 5px;
+      color: #17202a;
+      background: #fff;
+      cursor: pointer;
+    }
+    button:hover { background: #f2f5f5; }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    button.primary { border-color: #22755f; color: #fff; background: #267d65; }
+    button.primary:hover { background: #1f6a56; }
+    button.danger { border-color: #b6463d; color: #a52f28; background: #fff; }
+    main {
+      min-height: calc(100vh - 58px);
+      display: grid;
+      grid-template-columns: minmax(290px, 340px) minmax(0, 1fr);
+    }
+    aside {
+      min-width: 0;
+      padding: 18px;
+      background: #f8f9f9;
+      border-right: 1px solid #cbd2d5;
+    }
+    .section-title {
+      margin: 0 0 13px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #4e5d64;
+      text-transform: uppercase;
+    }
+    .control { margin-bottom: 16px; }
+    .control-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 7px;
+      font-size: 13px;
+    }
+    .control input[type="number"] {
+      width: 82px;
+      height: 30px;
+      padding: 3px 7px;
+      border: 1px solid #aeb8bd;
+      border-radius: 4px;
+      background: #fff;
+    }
+    input[type="range"] { width: 100%; accent-color: #267d65; }
+    .commands {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 8px;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid #d4dadd;
+    }
+    .commands .wide { grid-column: 1 / -1; }
+    .safety {
+      margin: 14px 0 0;
+      padding-left: 10px;
+      border-left: 3px solid #c7564b;
+      color: #8d332d;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .workspace { width: 100%; padding: 18px 20px 24px; min-width: 0; }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(105px, 1fr));
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .metric {
+      min-height: 70px;
+      padding: 10px;
+      border: 1px solid #c9d0d3;
+      border-radius: 6px;
+      background: #fff;
+    }
+    .metric span { display: block; color: #69777d; font-size: 11px; }
+    .metric strong { display: block; margin-top: 6px; font-size: 19px; font-weight: 650; }
+    .chart-panel {
+      border: 1px solid #c9d0d3;
+      border-radius: 6px;
+      background: #fff;
+      overflow: hidden;
+    }
+    .chart-toolbar {
+      min-height: 44px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid #d7dcde;
+    }
+    .legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: #56656b; }
+    .legend span::before {
+      content: "";
+      display: inline-block;
+      width: 18px;
+      height: 3px;
+      margin-right: 6px;
+      vertical-align: middle;
+      background: var(--line);
+    }
+    .plot { position: relative; height: 430px; min-height: 300px; }
+    canvas { display: block; width: 100%; height: 100%; }
+    .empty {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+      color: #859197;
+      font-size: 13px;
+    }
+    @media (max-width: 950px) {
+      main { grid-template-columns: 1fr; }
+      aside { border-right: 0; border-bottom: 1px solid #cbd2d5; }
+      .metrics { grid-template-columns: repeat(3, minmax(90px, 1fr)); }
+    }
+    @media (max-width: 520px) {
+      header { height: auto; min-height: 58px; padding: 10px 12px; align-items: flex-start; }
+      header { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+      .connection { align-items: flex-end; flex-direction: column-reverse; gap: 5px; }
+      aside, .workspace { padding: 14px 12px; }
+      .control-head { display: grid; grid-template-columns: minmax(0, 1fr) 82px; }
+      .control-head label, .safety { overflow-wrap: anywhere; }
+      .commands button { min-width: 0; padding-inline: 5px; }
+      .metrics { grid-template-columns: repeat(2, minmax(90px, 1fr)); }
+      .plot { height: 340px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Small Yaw PID Tuner</h1>
+    <div class="connection">
+      <span id="status" class="status">未连接</span>
+      <button id="connect" class="primary">连接串口</button>
+    </div>
+  </header>
+  <main>
+    <aside>
+      <p class="section-title">闭环参数</p>
+      <div id="controls"></div>
+      <div class="commands">
+        <button id="apply" class="primary wide" disabled>应用参数</button>
+        <button id="stepNeg" disabled>阶跃 -1°</button>
+        <button id="stepPos" disabled>阶跃 +1°</button>
+        <button id="resetPid" class="danger wide" disabled>清除 PID 状态</button>
+      </div>
+      <p class="safety">应用参数与阶跃测试前，将遥控器右开关置于急停。机械急停优先于软件操作。</p>
+    </aside>
+    <section class="workspace">
+      <div class="metrics">
+        <div class="metric"><span>目标角</span><strong id="ref">0.00°</strong></div>
+        <div class="metric"><span>反馈角</span><strong id="fdb">0.00°</strong></div>
+        <div class="metric"><span>误差</span><strong id="error">0.00°</strong></div>
+        <div class="metric"><span>滤波速度</span><strong id="speed">0.0 rpm</strong></div>
+        <div class="metric"><span>输出</span><strong id="effort">0</strong></div>
+        <div class="metric"><span>反馈电流</span><strong id="current">0</strong></div>
+      </div>
+      <div class="chart-panel">
+        <div class="chart-toolbar">
+          <div class="legend">
+            <span style="--line:#c9413a">角度误差</span>
+            <span style="--line:#2879b7">速度反馈</span>
+            <span style="--line:#d48222">输出 / 1000</span>
+          </div>
+          <button id="clear">清空曲线</button>
+        </div>
+        <div class="plot">
+          <canvas id="chart"></canvas>
+          <div id="empty" class="empty">等待遥测数据</div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script>
+    const FRAME_LEN = 16;
+    const CMD_TUNE = 0x20;
+    const CMD_DATA = 0x21;
+    const CMD_AUX = 0x22;
+    const CMD_ACTION = 0x23;
+    const CMD_SESSION = 0x24;
+    const controls = [
+      { id: "angKp", label: "角度环 Kp", min: 0, max: 5, step: 0.01, value: 2.60 },
+      { id: "spdKp", label: "速度环 Kp", min: 0, max: 10, step: 0.1, value: 0.60 },
+      { id: "speedLimit", label: "速度上限 rpm", min: 0, max: 30, step: 0.1, value: 24.0, optionalCap: true },
+      { id: "filterAlpha", label: "速度滤波 α", min: 0.01, max: 1, step: 0.01, value: 0.15 },
+      { id: "manualStep", label: "遥控步长 °/2ms", min: 0, max: 0.5, step: 0.005, value: 0.30, optionalCap: true },
+      { id: "effortLimit", label: "输出上限", min: 0, max: 8, step: 0.1, value: 6.0 }
+    ];
+    const controlHost = document.querySelector("#controls");
+    for (const item of controls) {
+      const row = document.createElement("div");
+      row.className = "control";
+      row.innerHTML = `<div class="control-head"><label for="${item.id}">${item.label}</label>` +
+        `<input id="${item.id}Number" type="number" min="${item.min}" max="${item.max}" step="${item.step}" value="${item.value}"></div>` +
+        `<input id="${item.id}" type="range" min="${item.min}" max="${item.max}" step="${item.step}" value="${item.value}">`;
+      controlHost.appendChild(row);
+      const range = row.querySelector(`#${item.id}`);
+      const number = row.querySelector(`#${item.id}Number`);
+      range.addEventListener("input", () => { number.value = range.value; });
+      number.addEventListener("input", () => { range.value = number.value; });
+      if (item.optionalCap) {
+        const label = document.createElement("label");
+        const unlimited = document.createElement("input");
+        unlimited.type = "checkbox";
+        unlimited.id = `${item.id}Unlimited`;
+        unlimited.checked = true;
+        label.append(unlimited, " 无固定上限");
+        row.appendChild(label);
+        const updateCap = () => { range.disabled = number.disabled = unlimited.checked; };
+        unlimited.addEventListener("change", updateCap);
+        updateCap();
+      }
+    }
+
+    const ui = {
+      connect: document.querySelector("#connect"), status: document.querySelector("#status"),
+      apply: document.querySelector("#apply"), stepNeg: document.querySelector("#stepNeg"),
+      stepPos: document.querySelector("#stepPos"), resetPid: document.querySelector("#resetPid"),
+      clear: document.querySelector("#clear"), empty: document.querySelector("#empty"),
+      ref: document.querySelector("#ref"), fdb: document.querySelector("#fdb"),
+      error: document.querySelector("#error"), speed: document.querySelector("#speed"),
+      effort: document.querySelector("#effort"), current: document.querySelector("#current"),
+      canvas: document.querySelector("#chart")
+    };
+    let port = null;
+    let reader = null;
+    let writer = null;
+    let heartbeatTimer = null;
+    let receiveBuffer = [];
+    const history = { error: [], speed: [], effort: [] };
+    const MAX_POINTS = 500;
+
+    function crc8(bytes) {
+      let crc = 0;
+      for (const byte of bytes) {
+        crc ^= byte;
+        for (let bit = 0; bit < 8; bit++) crc = (crc & 0x80) ? ((crc << 1) ^ 0x31) & 0xff : (crc << 1) & 0xff;
+      }
+      return crc;
+    }
+
+    function makeFrame(command, payload) {
+      const frame = new Uint8Array(FRAME_LEN);
+      frame[0] = 0xff;
+      frame[1] = command;
+      frame.set(payload.slice(0, 12), 2);
+      frame[14] = crc8(frame.slice(0, 14));
+      frame[15] = 0x0d;
+      return frame;
+    }
+
+    async function send(command, payload) {
+      if (!writer) return;
+      await writer.write(makeFrame(command, payload));
+    }
+
+    function controlValue(id) {
+      const input = document.querySelector(`#${id}Number`);
+      return Math.min(Number(input.max), Math.max(Number(input.min), Number(input.value) || 0));
+    }
+
+    async function applyTune() {
+      const payload = new Uint8Array(12);
+      const view = new DataView(payload.buffer);
+      view.setUint16(0, Math.round(controlValue("angKp") * 1000), true);
+      view.setUint16(2, Math.round(controlValue("spdKp") * 1000), true);
+      view.setUint16(4, document.querySelector("#speedLimitUnlimited").checked ?
+        0xffff : Math.round(controlValue("speedLimit") * 100), true);
+      view.setUint16(6, Math.round(controlValue("filterAlpha") * 10000), true);
+      view.setUint16(8, document.querySelector("#manualStepUnlimited").checked ?
+        0xffff : Math.round(controlValue("manualStep") * 10000), true);
+      view.setUint16(10, Math.round(controlValue("effortLimit") * 1000), true);
+      await send(CMD_TUNE, payload);
+      setStatus("参数已发送", true);
+    }
+
+    async function sendAction(flags, stepDeg = 0) {
+      const payload = new Uint8Array(12);
+      const view = new DataView(payload.buffer);
+      view.setInt16(0, Math.round(stepDeg * 100), true);
+      payload[2] = flags;
+      await send(CMD_ACTION, payload);
+    }
+
+    function setStatus(text, online) {
+      ui.status.textContent = text;
+      ui.status.classList.toggle("online", online);
+    }
+
+    function setConnected(connected) {
+      ui.connect.textContent = connected ? "断开" : "连接串口";
+      for (const button of [ui.apply, ui.stepNeg, ui.stepPos, ui.resetPid]) button.disabled = !connected;
+      setStatus(connected ? "串口已连接，等待遥测" : "未连接", connected);
+    }
+
+    async function connectSerial() {
+      if (port) {
+        await disconnectSerial();
+        return;
+      }
+      if (!("serial" in navigator)) {
+        setStatus("浏览器不支持 Web Serial", false);
+        return;
+      }
+      try {
+        port = await navigator.serial.requestPort();
+        await port.open({ baudRate: 115200, dataBits: 8, stopBits: 1, parity: "none", flowControl: "none" });
+        writer = port.writable.getWriter();
+        setConnected(true);
+        await send(CMD_SESSION, new Uint8Array(12));
+        heartbeatTimer = setInterval(() => {
+          send(CMD_SESSION, new Uint8Array(12)).catch(() => {});
+        }, 250);
+        readLoop();
+      } catch (error) {
+        setStatus(error.name === "NotFoundError" ? "未选择串口" : `连接失败：${error.message}`, false);
+        port = null;
+      }
+    }
+
+    async function disconnectSerial() {
+      if (heartbeatTimer) clearInterval(heartbeatTimer);
+      heartbeatTimer = null;
+      try {
+        if (reader) await reader.cancel();
+        if (writer) { writer.releaseLock(); writer = null; }
+        if (port) await port.close();
+      } catch (_) {}
+      reader = null;
+      port = null;
+      setConnected(false);
+    }
+
+    async function readLoop() {
+      try {
+        while (port?.readable) {
+          reader = port.readable.getReader();
+          try {
+            while (true) {
+              const { value, done } = await reader.read();
+              if (done) break;
+              if (value) parseBytes(value);
+            }
+          } finally {
+            reader.releaseLock();
+            reader = null;
+          }
+        }
+      } catch (error) {
+        setStatus(`串口读取失败：${error.message}`, false);
+      }
+    }
+
+    function parseBytes(bytes) {
+      receiveBuffer.push(...bytes);
+      while (receiveBuffer.length >= FRAME_LEN) {
+        const start = receiveBuffer.indexOf(0xff);
+        if (start < 0) { receiveBuffer.length = 0; return; }
+        if (start > 0) receiveBuffer.splice(0, start);
+        if (receiveBuffer.length < FRAME_LEN) return;
+        const frame = receiveBuffer.slice(0, FRAME_LEN);
+        if (frame[15] !== 0x0d || crc8(frame.slice(0, 14)) !== frame[14]) {
+          receiveBuffer.shift();
+          continue;
+        }
+        receiveBuffer.splice(0, FRAME_LEN);
+        handleFrame(Uint8Array.from(frame));
+      }
+    }
+
+    function handleFrame(frame) {
+      const view = new DataView(frame.buffer, frame.byteOffset, frame.byteLength);
+      if (frame[1] === CMD_DATA) {
+        const sample = {
+          ref: view.getUint16(2, true) / 100,
+          fdb: view.getUint16(4, true) / 100,
+          error: view.getInt16(6, true) / 100,
+          speedRef: view.getInt16(8, true) / 10,
+          speed: view.getInt16(10, true) / 10,
+          effort: view.getInt16(12, true)
+        };
+        ui.ref.textContent = `${sample.ref.toFixed(2)}°`;
+        ui.fdb.textContent = `${sample.fdb.toFixed(2)}°`;
+        ui.error.textContent = `${sample.error.toFixed(2)}°`;
+        ui.speed.textContent = `${sample.speed.toFixed(1)} rpm`;
+        ui.effort.textContent = `${sample.effort}`;
+        pushPoint(sample);
+        setStatus("遥测在线", true);
+      } else if (frame[1] === CMD_AUX) {
+        const rawSpeed = view.getInt16(2, true) / 10;
+        const current = view.getInt16(4, true);
+        ui.current.textContent = `${current}`;
+        const online = frame[6] !== 0;
+        setStatus(online ? `电机在线 · 原始速度 ${rawSpeed.toFixed(1)} rpm` : "串口在线 · 电机离线", online);
+      }
+    }
+
+    function pushPoint(sample) {
+      history.error.push(sample.error);
+      history.speed.push(sample.speed);
+      history.effort.push(sample.effort / 1000);
+      for (const series of Object.values(history)) if (series.length > MAX_POINTS) series.shift();
+      ui.empty.hidden = true;
+      drawChart();
+    }
+
+    function drawChart() {
+      const canvas = ui.canvas;
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const width = Math.max(1, Math.round(rect.width * dpr));
+      const height = Math.max(1, Math.round(rect.height * dpr));
+      if (canvas.width !== width || canvas.height !== height) { canvas.width = width; canvas.height = height; }
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const w = rect.width, h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+      ctx.strokeStyle = "#e1e5e7";
+      ctx.lineWidth = 1;
+      for (let i = 1; i < 6; i++) {
+        const y = i * h / 6;
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+      }
+      const all = [...history.error, ...history.speed, ...history.effort];
+      const peak = Math.max(1, ...all.map(Math.abs));
+      const scale = (h * 0.42) / peak;
+      const colors = { error: "#c9413a", speed: "#2879b7", effort: "#d48222" };
+      ctx.strokeStyle = "#aab3b7";
+      ctx.beginPath(); ctx.moveTo(0, h / 2); ctx.lineTo(w, h / 2); ctx.stroke();
+      for (const [name, series] of Object.entries(history)) {
+        if (series.length < 2) continue;
+        ctx.strokeStyle = colors[name];
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        series.forEach((value, index) => {
+          const x = index * w / (MAX_POINTS - 1);
+          const y = h / 2 - value * scale;
+          if (index === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+      }
+      ctx.fillStyle = "#65747a";
+      ctx.font = "11px Segoe UI";
+      ctx.fillText(`±${peak.toFixed(1)}`, 8, 16);
+    }
+
+    ui.connect.addEventListener("click", connectSerial);
+    ui.apply.addEventListener("click", applyTune);
+    ui.stepNeg.addEventListener("click", () => sendAction(0x02, -1));
+    ui.stepPos.addEventListener("click", () => sendAction(0x02, 1));
+    ui.resetPid.addEventListener("click", () => sendAction(0x01));
+    ui.clear.addEventListener("click", () => {
+      for (const series of Object.values(history)) series.length = 0;
+      ui.empty.hidden = false;
+      drawChart();
+    });
+    window.addEventListener("resize", drawChart);
+    navigator.serial?.addEventListener("disconnect", disconnectSerial);
+    drawChart();
+  </script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101514">
+  <title>一炷清愿</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="seal">清愿</p>
+        <h1>一炷清愿</h1>
+      </div>
+      <div class="status-cluster" aria-live="polite">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">香未点燃</span>
+        <time id="clock"></time>
+      </div>
+    </header>
+
+    <section class="simulator" aria-label="烧香模拟场景">
+      <canvas id="scene" aria-label="香炉与烟雾动画"></canvas>
+
+      <aside class="wish-rail">
+        <div class="wish-heading">
+          <span>愿笺</span>
+          <strong id="wishCount">0</strong>
+        </div>
+        <div class="wish-list" id="wishList" aria-live="polite"></div>
+        <form id="wishForm" autocomplete="off">
+          <label for="wishInput">所愿</label>
+          <div class="wish-entry">
+            <input id="wishInput" maxlength="28" placeholder="写下一件心愿">
+            <button type="submit" title="投入愿笺" aria-label="投入愿笺">投愿</button>
+          </div>
+        </form>
+      </aside>
+
+      <div class="burn-meter" aria-label="香火剩余">
+        <span>香火</span>
+        <div class="meter-track"><i id="burnFill"></i></div>
+        <strong id="burnValue">100%</strong>
+      </div>
+
+      <nav class="controls" aria-label="香火控制">
+        <div class="segmented" aria-label="香的数量">
+          <button class="segment active" data-count="1" type="button">一炷</button>
+          <button class="segment" data-count="3" type="button">三炷</button>
+        </div>
+        <button class="action primary" id="lightBtn" type="button">
+          <span class="action-icon" aria-hidden="true">火</span>
+          <span>点香</span>
+        </button>
+        <button class="action" id="fanBtn" type="button">
+          <span class="action-icon" aria-hidden="true">风</span>
+          <span>轻扇</span>
+        </button>
+        <button class="action danger" id="extinguishBtn" type="button">
+          <span class="action-icon" aria-hidden="true">止</span>
+          <span>熄灭</span>
+        </button>
+      </nav>
+    </section>
+
+    <footer>
+      <span id="burnTime">静候点香</span>
+      <span>今日敬香 <strong id="sessionCount">0</strong> 次</span>
+    </footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

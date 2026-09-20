@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "status": "FROZEN_SPEED_REFERENCE_S1_S2",
+  "purpose": "identify the retained dual speed loops for a speed-reference MPC interface",
+  "firmware_build": "0x59490702",
+  "trace_version": 5,
+  "sample_period_ms": 4,
+  "duration_ms": 36000,
+  "nominal_records": 9001,
+  "segments_ms": {
+    "baseline": [0, 3000],
+    "excitation": [3000, 31000],
+    "settle": [31000, 36000]
+  },
+  "reference_units": "centidegrees_per_second_on_wire",
+  "controller_interface": {
+    "big": "scheduled big motor speed reference enters the existing big speed PID in rpm after division by 6",
+    "small": "scheduled inertial yaw-rate reference enters the existing small speed PID in rpm after division by 6",
+    "bypassed": "both angle PIDs",
+    "retained": ["both speed PIDs", "effort clamps", "small joint speed/effort soft limits"]
+  },
+  "waveform": {
+    "definition": "analytic derivative of sin(pi*t/T)^2 times a multisine position primitive",
+    "drive_duration_s": 28.0,
+    "big_peak_dps": 30.0,
+    "small_peak_dps": 60.0,
+    "sets": {
+      "S1": {
+        "role": "model development",
+        "big": {"harmonics": [5, 13, 29, 61], "primitive_amplitude_deg": [4.4576823, 3.3432617, 1.6716309, 0.5572103], "phase_rad": [0.31, 1.47, 2.71, 4.19]},
+        "small": {"harmonics": [8, 19, 41, 83], "primitive_amplitude_deg": [5.6957129, 4.5565703, 2.2782852, 0.9113141], "phase_rad": [1.03, 2.33, 4.41, 0.57]}
+      },
+      "S2": {
+        "role": "independent validation after model and gates are frozen",
+        "big": {"harmonics": [7, 17, 37, 79], "primitive_amplitude_deg": [3.2938282, 2.4703712, 1.2351856, 0.4117285], "phase_rad": [2.02, 0.63, 3.82, 5.21]},
+        "small": {"harmonics": [11, 23, 47, 101], "primitive_amplitude_deg": [4.5531931, 3.6425546, 1.8212773, 0.7285109], "phase_rad": [0.49, 3.07, 1.58, 4.76]}
+      }
+    }
+  },
+  "preview": {
+    "S1": {"big_reference_travel_peak_deg": 7.62717, "heading_reference_travel_peak_deg": 12.54844, "planar_difference_peak_deg": 17.61157, "big_acceleration_peak_dps2": 197.94, "small_acceleration_peak_dps2": 576.98},
+    "S2": {"big_reference_travel_peak_deg": 6.86333, "heading_reference_travel_peak_deg": 10.32187, "planar_difference_peak_deg": 11.96102, "big_acceleration_peak_dps2": 242.78, "small_acceleration_peak_dps2": 655.26}
+  },
+  "speed_profile_runtime_guards": {
+    "big_relative_travel_abort_deg": null,
+    "small_relative_travel_abort_deg": 20.0,
+    "heading_relative_travel_abort_deg": null,
+    "big_and_heading_travel_policy": "disabled for cable-free S1/S2 by operator review; both remain recorded",
+    "big_measured_rate_abort_dps": 360.0,
+    "small_measured_rate_abort_dps": 180.0,
+    "heartbeat_timeout_ms": 300,
+    "feedback_timeout_ms": 50,
+    "maximum_scheduler_step_ms": 10,
+    "operator_up_abort": true,
+    "neutral_input_abort": true,
+    "big_effort_limit_max_software_units": 30.0,
+    "small_effort_limit_max_software_units": 6.0
+  },
+  "data_policy": {
+    "S1_is_development_data": true,
+    "S2_must_not_be_collected_before_S1_model_and_acceptance_gates_are_frozen": true,
+    "hardware_takeover_allowed": false
+  }
+}

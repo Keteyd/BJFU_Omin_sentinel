@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "status": "FROZEN_CABLE_FREE_AMPLITUDE_LADDER",
+  "purpose": "separate cable-removal replication from larger-signal closed-loop characterization",
+  "source_reference_plan_sha256": "F59EA206EBCBFE0914C10CE6619B49F5EF2E6257625EACA229A6BD9AAB0A84BE",
+  "source_phase": "E",
+  "sample_period_ms": 4,
+  "duration_ms": 36000,
+  "nominal_records": 9001,
+  "phase_sets": {
+    "R1": {
+      "scale": 1.0,
+      "role": "exact phase-E waveform replication after cable removal; development comparison only"
+    },
+    "F4": {
+      "scale": 4.0,
+      "role": "recommended primary larger-signal cable-free characterization"
+    },
+    "F5": {
+      "scale": 5.0,
+      "role": "optional upper step only after F4 completes without travel, rate or output saturation"
+    }
+  },
+  "reference_preview": {
+    "R1": {
+      "big_peak_deg": 2.792433638,
+      "heading_peak_deg": 1.926486920,
+      "planar_implied_small_joint_peak_deg": 3.153722840,
+      "big_rate_peak_dps": 8.730476283,
+      "heading_rate_peak_dps": 9.381414602,
+      "planar_implied_small_joint_rate_peak_dps": 13.852061979,
+      "big_acceleration_peak_dps2": 88.901784484,
+      "heading_acceleration_peak_dps2": 82.445703274,
+      "planar_implied_small_joint_acceleration_peak_dps2": 130.490215
+    },
+    "F4": {
+      "big_peak_deg": 11.169734550,
+      "heading_peak_deg": 7.705947682,
+      "planar_implied_small_joint_peak_deg": 12.614891360,
+      "big_rate_peak_dps": 34.921905131,
+      "heading_rate_peak_dps": 37.525658410,
+      "planar_implied_small_joint_rate_peak_dps": 55.408247916,
+      "big_acceleration_peak_dps2": 355.607137937,
+      "heading_acceleration_peak_dps2": 329.782813095,
+      "planar_implied_small_joint_acceleration_peak_dps2": 521.960860
+    },
+    "F5": {
+      "big_peak_deg": 13.962168188,
+      "heading_peak_deg": 9.632434602,
+      "planar_implied_small_joint_peak_deg": 15.768614200,
+      "big_rate_peak_dps": 43.652381413,
+      "heading_rate_peak_dps": 46.907073012,
+      "planar_implied_small_joint_rate_peak_dps": 69.260309895,
+      "big_acceleration_peak_dps2": 444.508922421,
+      "heading_acceleration_peak_dps2": 412.228516369,
+      "planar_implied_small_joint_acceleration_peak_dps2": 652.451075
+    }
+  },
+  "rejected_10x_preview": {
+    "big_peak_deg": 27.924336375,
+    "heading_peak_deg": 19.264869205,
+    "planar_implied_small_joint_peak_deg": 31.537228400,
+    "reason": "exceeds big-relative and small-relative travel guards and is expected to exceed the small-yaw effort limit"
+  },
+  "unchanged_runtime_guards": {
+    "big_relative_travel_abort_deg": 25.0,
+    "small_relative_travel_abort_deg": 20.0,
+    "heading_relative_travel_abort_deg": 20.0,
+    "big_measured_rate_abort_dps": 360.0,
+    "small_measured_rate_abort_dps": 180.0,
+    "heartbeat_timeout_ms": 300,
+    "feedback_timeout_ms": 50,
+    "maximum_sample_interval_ms": 10,
+    "big_effort_limit_max_software_units": 30.0,
+    "small_effort_limit_max_software_units": 6.0,
+    "runtime_reference_acceleration_abort": false
+  },
+  "execution_order": [
+    "R1 after cable removal, with PID and mechanical configuration otherwise unchanged",
+    "RELEASE and review R1",
+    "F4",
+    "RELEASE and inspect travel, measured rate, command saturation and current",
+    "F5 only if F4 has margin; F5 is optional"
+  ],
+  "data_policy": {
+    "R1_is_not_a_repeat_independent_E_validation": true,
+    "all_ladder_phases_are_development_data": true,
+    "do_not_mix_mechanical_configuration_changes_with_PID_changes": true,
+    "hardware_takeover_allowed": false
+  }
+}

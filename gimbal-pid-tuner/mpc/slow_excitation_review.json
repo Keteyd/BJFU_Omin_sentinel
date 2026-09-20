@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "status": "DRAFT_OFFLINE_ONLY_NOT_FIRMWARE_CONFIGURATION",
+  "hardware_execution_authorized": false,
+  "profile": "quintic_bidirectional_dwell_20s",
+  "sample_period_ms": 4,
+  "duration_ms": 20000,
+  "knots_ms": [0, 2000, 4000, 7000, 11000, 14000, 16000, 20000],
+  "normalized_targets": [0, 0, 1, 1, -1, -1, 0, 0],
+  "peak_target_deg": {"big": 15.0, "small": 10.0},
+  "order": ["big_positive_first", "small_positive_first", "big_negative_first", "small_negative_first"],
+  "small_joint_start_abs_max_deg": 2.0,
+  "small_soft_min_deg": -56.677734375,
+  "small_soft_max_deg": 29.080078125,
+  "small_soft_guard_deg": 5.0,
+  "proposed_observed_travel_abort_deg": {"big_joint": 25.0, "small_joint": 20.0, "imu_heading": 20.0},
+  "existing_rate_abort_dps_unchanged": {"big": 360.0, "small": 180.0},
+  "existing_effort_limits_unchanged": {"big": 30.0, "small": 6.0},
+  "existing_buffer_records": 1001,
+  "existing_record_bytes": 48,
+  "existing_frame_bytes": 16,
+  "existing_frames_per_record": 6,
+  "existing_uart_baud": 115200,
+  "proposed_uart_baud_for_bench_validation": 460800,
+  "required_before_execution": [
+    "operator_reviews_amplitude_pose_load_and_clearance",
+    "new_versioned_firmware_and_host_profile_support",
+    "bench_validated_full_rate_streaming_without_motor_output",
+    "reviewed_link_loss_buffer_overflow_and_estop_tests",
+    "runtime_reference_and_measured_joint_envelope_checks",
+    "new_explicit_arm_confirmation_per_trial"
+  ]
+}

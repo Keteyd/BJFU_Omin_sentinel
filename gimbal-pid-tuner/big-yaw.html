@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>大 Yaw · PID 调参</title>
+  <link rel="stylesheet" href="big-yaw.css">
+  <script defer src="lucide-0.468.0.min.js"></script>
+  <script defer src="big-yaw-core.js"></script>
+  <script defer src="big-yaw.js"></script>
+</head>
+<body>
+  <header>
+    <div class="brand"><i data-lucide="crosshair"></i><div><h1>大 Yaw <span>PID 调参</span></h1><p>云台主控 / USART1 / GM6020</p></div></div>
+    <div class="connection"><span id="connectionState" role="status">未连接</span><button id="connect" class="primary"><i data-lucide="plug-zap"></i><span>连接串口</span></button></div>
+  </header>
+  <div class="statusbar">
+    <span id="remoteState" class="badge">遥控状态未知</span>
+    <span id="motorState">电机 —</span><span id="activeState">闭环 —</span><span id="saturationState">输出 —</span>
+    <span id="age" class="age">回读 —</span>
+  </div>
+  <main>
+    <aside>
+      <div class="section-head"><h2>控制参数</h2><span class="tag">RAM</span></div>
+      <div class="table-head"><span>编辑值</span><span>主控回读</span></div>
+      <form id="parameters" novalidate>
+        <div id="fields"></div>
+        <div class="actions"><button id="read" type="button" disabled><i data-lucide="refresh-cw"></i>读取当前参数</button><button id="apply" class="primary" type="submit" aria-describedby="writeGate" disabled><i data-lucide="upload"></i>检查并写入</button></div>
+      </form>
+      <p id="writeGate" class="gate">等待主控回读</p>
+      <div class="safety"><i data-lucide="shield-alert"></i><div><strong>写入前右拨杆上置，并支撑 Pitch</strong><p>参数复位后丢失。断开串口不是急停。</p></div></div>
+      <div class="section-head history-title"><h2>写入记录</h2><span id="lastRequest">—</span></div>
+      <ol id="events" aria-live="polite"><li class="placeholder">暂无记录</li></ol>
+    </aside>
+    <section class="workspace">
+      <div class="section-head"><div><h2>实时反馈</h2><p id="mode">大 Yaw / 等待遥测</p></div><div class="tools">
+        <button id="pause" class="icon" title="暂停曲线" aria-label="暂停曲线"><i data-lucide="pause"></i></button>
+        <button id="clear" class="icon" title="清空曲线" aria-label="清空曲线"><i data-lucide="rotate-ccw"></i></button>
+        <button id="export" class="icon" title="导出 CSV" aria-label="导出 CSV" disabled><i data-lucide="download"></i></button>
+      </div></div>
+      <div class="metrics">
+        <div><span>编码器角度</span><strong id="angle">—</strong><small>deg / 0–360</small></div>
+        <div><span>角度误差</span><strong id="error">—</strong><small>deg</small></div>
+        <div><span>速度反馈</span><strong id="speed">—</strong><small>rpm</small></div>
+        <div><span>输出指令</span><strong id="effort">—</strong><small>驱动单位</small></div>
+      </div>
+      <div id="notice" role="status">等待串口连接</div>
+      <div class="plot-head"><h3><b class="swatch red"></b>角度误差 <span>deg</span></h3><span>最近 30 s</span></div>
+      <div class="plot"><canvas id="errorChart" aria-label="角度误差曲线"></canvas></div>
+      <div class="plot-head"><h3><b class="swatch blue"></b>速度 <span>rpm</span></h3><span><b class="swatch blue"></b>反馈 <b class="swatch green"></b>目标</span></div>
+      <div class="plot"><canvas id="speedChart" aria-label="目标速度与反馈速度曲线"></canvas></div>
+      <div class="plot-head"><h3><b class="swatch amber"></b>输出指令</h3><span id="sampleRate">0 帧</span></div>
+      <div class="plot"><canvas id="effortChart" aria-label="输出指令曲线"></canvas></div>
+      <footer><span>遥测约 10 Hz</span><span id="protocolState">大 Yaw · 接口待确认</span></footer>
+    </section>
+  </main>
+  <dialog id="review">
+    <form method="dialog">
+      <div class="section-head"><h2>确认大 Yaw 参数</h2><button value="cancel" class="icon" title="取消" aria-label="取消"><i data-lucide="x"></i></button></div>
+      <table><thead><tr><th>参数</th><th>当前</th><th>写入</th></tr></thead><tbody id="diff"></tbody></table>
+      <p class="warning">写入会改变电机响应；不启动电机，不保存到 Flash。</p>
+      <label class="confirm"><input type="checkbox" id="confirmed">已上置、支撑 Pitch，并确认周围安全</label>
+      <p id="reviewGate" class="gate"></p>
+      <div class="actions"><button value="cancel">取消</button><button id="confirmApply" type="button" class="primary" disabled><i data-lucide="upload"></i>确认写入</button></div>
+    </form>
+  </dialog>
+</body>
+</html>

@@ -1,0 +1,1 @@
+/* No referee hardware is used by the PC frame transport test. */

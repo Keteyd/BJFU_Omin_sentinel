@@ -1,0 +1,64 @@
+# Local workspace, temporary captures, and old snapshots
+NoMachineTemp/
+trash/
+Microsoft/
+
+# Python caches and local environments
+**/__pycache__/
+*.py[cod]
+*.pyd
+.venv/
+venv/
+**/.venv/
+**/venv/
+
+# Editor and OS metadata
+.vscode/
+.idea/
+.vs/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Keil/STM32 build output and intermediate files
+**/Objects/
+**/Objects_*/
+**/Listings/
+**/build/
+**/Build/
+**/Debug/
+**/Release/
+**/obj/
+**/out/
+**/*.o
+**/*.d
+**/*.crf
+**/*.dep
+**/*.axf
+**/*.elf
+**/*.map
+**/*.lst
+**/*.lnp
+**/*.iex
+**/*.srec
+**/*.htm
+**/*.bak
+**/*.tmp
+**/*.log
+**/*.jdebug
+**/*.jdebug.user
+**/*.uvguix.*
+**/*.uvoptx
+**/JLinkLog.txt
+
+# Local secrets and SSH material
+**/id_rsa
+**/id_rsa.*
+**/id_ed25519
+**/id_ed25519.*
+**/*_ed25519
+**/*_ed25519.*
+**/known_hosts
+
+# Keep source and deliberately checked-in test fixtures (CSV/BIN/HEX) unless
+# they are explicitly classified as build output or private capture data.
