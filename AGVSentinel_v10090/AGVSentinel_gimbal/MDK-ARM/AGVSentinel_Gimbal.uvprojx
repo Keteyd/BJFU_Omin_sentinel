@@ -625,6 +625,11 @@
               <FilePath>..\Src\Application\app_init.c</FilePath>
             </File>
             <File>
+              <FileName>app_attitude_link.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\Application\app_attitude_link.c</FilePath>
+            </File>
+            <File>
               <FileName>app_ins.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\Application\app_ins.c</FilePath>

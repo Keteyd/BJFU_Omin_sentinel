@@ -1,4 +1,5 @@
 #include "app_autoaim.h"
+#include "app_attitude_link.h"
 #include "periph_pc_comm.h"
 #include "app_yaw_identification.h"
 
@@ -264,7 +265,7 @@ void SendVisionData(VisionDataSend_Typedef* RAW_Data)
 	if (RAW_Data == NULL) {
 		return;
 	}
-	if (PC_Comm_IsGimbalTuneSessionOnline() || YawIdentApp_IsOnline()) {
+	if (AttitudeLink_IsOnline() || PC_Comm_IsGimbalTuneSessionOnline() || YawIdentApp_IsOnline()) {
 		return;
 	}
 
@@ -290,7 +291,7 @@ void SendVisionData(VisionDataSend_Typedef* RAW_Data)
 	data_buffer[VISION_FRAME_CRC_OFFSET] = RAW_Data->CRCcode;
 	data_buffer[VISION_FRAME_END_OFFSET] = RAW_Data->end;
 
-	HAL_UART_Transmit_DMA(&huart1, data_buffer, sizeof(data_buffer));
+	(void)AttitudeLink_SendLegacy(data_buffer, sizeof(data_buffer));
 }
 static volatile uint32_t s_autoaim_last_update_time = 0U;
 
@@ -337,6 +338,7 @@ static UartMux_State s_uart_mux;
 
 static uint8_t AutoAim_MuxValid(const uint8_t *data, uint16_t len)
 {
+    if (data[0] == 0xa6U) return AttitudeLink_Validate(data, len);
     if (data[0] == PC_COMM_HEADER_SOF)
         return (uint8_t)(len == PC_COMM_PACKET_LEN &&
             data[PC_COMM_TAIL_OFFSET] == PC_COMM_TAIL_EOF && PC_Comm_VerifyChecksum(data));
@@ -346,7 +348,8 @@ static uint8_t AutoAim_MuxValid(const uint8_t *data, uint16_t len)
 
 static void AutoAim_MuxDispatch(const uint8_t *data, uint16_t len)
 {
-    if (data[0] == PC_COMM_HEADER_SOF) PC_Comm_DecodePacket(data, len);
+    if (data[0] == 0xa6U) AttitudeLink_Receive(data, len);
+    else if (data[0] == PC_COMM_HEADER_SOF) PC_Comm_DecodePacket(data, len);
     else {
         uint8_t frame[ChariotRecognition_data_len];
         memcpy(frame, data, sizeof(frame));

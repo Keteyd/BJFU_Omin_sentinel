@@ -5,6 +5,7 @@
  */
 
 #include "periph_pc_comm.h"
+#include "app_attitude_link.h"
 #include "app_yaw_identification.h"
 #include "module_can_trace.h"
 #include "periph_referee.h"
@@ -26,21 +27,12 @@ PC_Recv_BigYawTune_t PC_BigYawTune;
 float PC_BigYawFullValues[BIG_YAW_FULL_COUNT];
 static BigYaw_FullStage s_big_yaw_full_stage;
 _Static_assert(sizeof(float) == 4, "Full PID wire format requires float32");
-static uint8_t PC_Comm_TxData[PC_COMM_PACKET_LEN];
-static uint8_t PC_Comm_BatchTxData[6U * PC_COMM_PACKET_LEN];
-static uint8_t PC_Comm_TraceTxData[CAN_TRACE_FRAME_BYTES];
 
 uint8_t PC_Comm_SendTrace(uint32_t trial_id, uint16_t sequence, const void *record) {
-    uint32_t mask; uint8_t sent;
-    if (Const_PC_Comm_UART_HANDLER == NULL || record == NULL) return 0U;
-    mask = __get_PRIMASK(); __disable_irq();
-    if (Const_PC_Comm_UART_HANDLER->gState != HAL_UART_STATE_READY) {
-        __set_PRIMASK(mask); return 0U;
-    }
-    CanTrace_Frame(PC_Comm_TraceTxData, trial_id, sequence, record);
-    sent = (uint8_t)(HAL_UART_Transmit_DMA(Const_PC_Comm_UART_HANDLER, PC_Comm_TraceTxData,
-                                         CAN_TRACE_FRAME_BYTES) == HAL_OK);
-    __set_PRIMASK(mask); return sent;
+    uint8_t frame[CAN_TRACE_FRAME_BYTES];
+    if (record == NULL) return 0U;
+    CanTrace_Frame(frame, trial_id, sequence, record);
+    return AttitudeLink_SendLegacy(frame, sizeof(frame));
 }
 
 _Static_assert(sizeof(PC_Recv_BigYawTune_t) == 12, "Big yaw tune payload size");
@@ -470,10 +462,10 @@ const PC_Recv_PitchPidAction_t* PC_Comm_GetPitchTuneAction(void) {
 }
 
 uint8_t PC_Comm_SendPacket(uint8_t cmd_id, const void *payload, uint16_t payload_len) {
+    uint8_t PC_Comm_TxData[PC_COMM_PACKET_LEN];
     uint16_t copy_len = payload_len;
 
     if (Const_PC_Comm_UART_HANDLER == NULL || payload == NULL) return 0U;
-    if (Const_PC_Comm_UART_HANDLER->gState != HAL_UART_STATE_READY) return 0U;
     if (copy_len > PC_COMM_CMD_PAYLOAD_LEN) copy_len = PC_COMM_CMD_PAYLOAD_LEN;
 
     memset(PC_Comm_TxData, 0, sizeof(PC_Comm_TxData));
@@ -484,20 +476,13 @@ uint8_t PC_Comm_SendPacket(uint8_t cmd_id, const void *payload, uint16_t payload
         PC_Comm_CalculateCRC8(PC_Comm_TxData, PC_COMM_CRC_OFFSET);
     PC_Comm_TxData[PC_COMM_TAIL_OFFSET] = PC_COMM_TAIL_EOF;
 
-    return (uint8_t)(HAL_UART_Transmit_IT(Const_PC_Comm_UART_HANDLER,
-                                          PC_Comm_TxData,
-                                          PC_COMM_PACKET_LEN) == HAL_OK);
+    return AttitudeLink_SendLegacy(PC_Comm_TxData, PC_COMM_PACKET_LEN);
 }
 
 uint8_t PC_Comm_SendBatch(uint8_t cmd_id, const uint8_t *payloads, uint8_t count) {
-    uint32_t mask;
-    uint8_t sent, i;
-    if (Const_PC_Comm_UART_HANDLER == NULL || payloads == NULL || count == 0U || count > 6U)
-        return 0U;
-    mask = __get_PRIMASK(); __disable_irq();
-    if (Const_PC_Comm_UART_HANDLER->gState != HAL_UART_STATE_READY) {
-        __set_PRIMASK(mask); return 0U;
-    }
+    uint8_t PC_Comm_BatchTxData[6U * PC_COMM_PACKET_LEN];
+    uint8_t i;
+    if (payloads == NULL || count == 0U || count > 6U) return 0U;
     for (i = 0U; i < count; ++i) {
         uint8_t *frame = PC_Comm_BatchTxData + i * PC_COMM_PACKET_LEN;
         frame[0] = PC_COMM_HEADER_SOF; frame[1] = cmd_id;
@@ -505,8 +490,6 @@ uint8_t PC_Comm_SendBatch(uint8_t cmd_id, const uint8_t *payloads, uint8_t count
         frame[PC_COMM_CRC_OFFSET] = PC_Comm_CalculateCRC8(frame, PC_COMM_CRC_OFFSET);
         frame[PC_COMM_TAIL_OFFSET] = PC_COMM_TAIL_EOF;
     }
-    sent = (uint8_t)(HAL_UART_Transmit_DMA(Const_PC_Comm_UART_HANDLER, PC_Comm_BatchTxData,
-        (uint16_t)(count * PC_COMM_PACKET_LEN)) == HAL_OK);
-    __set_PRIMASK(mask);
-    return sent;
+    return AttitudeLink_SendLegacy(PC_Comm_BatchTxData,
+                                  (uint16_t)(count * PC_COMM_PACKET_LEN));
 }

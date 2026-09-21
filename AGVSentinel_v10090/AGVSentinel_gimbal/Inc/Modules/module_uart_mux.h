@@ -5,7 +5,7 @@
 #include <string.h>
 
 typedef struct {
-    uint8_t bytes[16];
+    uint8_t bytes[96];
     uint8_t used;
     uint32_t last_ms;
 } UartMux_State;
@@ -26,6 +26,14 @@ static inline void UartMux_Push(UartMux_State *s, const uint8_t *data,
         while (s->used) {
             uint16_t needed = s->bytes[0] == 0xFFU ? 16U :
                 (s->bytes[0] == 0x53U ? 15U : 0U);
+            if (s->bytes[0] == 0xa6U) {
+                if (s->used < 2U) break;
+                if (s->bytes[1] == 0x5aU) {
+                    if (s->used < 6U) break;
+                    needed = (uint16_t)(20U + s->bytes[4] + ((uint16_t)s->bytes[5] << 8));
+                    if (s->bytes[2] != 1U || needed < 20U || needed > sizeof(s->bytes)) needed = 0U;
+                }
+            }
             if (needed && s->used < needed) break;
             if (needed && valid(s->bytes, needed)) {
                 dispatch(s->bytes, needed);

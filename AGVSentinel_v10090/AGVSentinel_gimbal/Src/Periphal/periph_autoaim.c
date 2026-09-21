@@ -1,4 +1,5 @@
 #include "periph_autoaim.h"
+#include "app_attitude_link.h"
 #include "module_uart_mux.h"
 
 
@@ -84,21 +85,7 @@ void usart1_rx_dma_init(void)
 
 void usart1_tx_dma_enable(uint8_t *data, uint16_t len)
 {
-    //disable DMA
-    //失效DMA
-    __HAL_DMA_DISABLE(&hdma_usart1_tx);
-
-    while(hdma_usart1_tx.Instance->CR & DMA_SxCR_EN)
-    {
-        __HAL_DMA_DISABLE(&hdma_usart1_tx);
-    }
-
-    __HAL_DMA_CLEAR_FLAG(&hdma_usart1_tx, DMA_HISR_TCIF7);
-
-    hdma_usart1_tx.Instance->M0AR = (uint32_t)(data);
-    __HAL_DMA_SET_COUNTER(&hdma_usart1_tx, len);
-
-    __HAL_DMA_ENABLE(&hdma_usart1_tx);
+    (void)AttitudeLink_SendLegacy(data, len);
 }
 
 void usart1_rx_dma_enable(uint8_t *data, uint16_t len)

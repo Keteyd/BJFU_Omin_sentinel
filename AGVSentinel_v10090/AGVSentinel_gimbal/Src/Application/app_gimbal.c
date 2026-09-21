@@ -1,4 +1,5 @@
 #include "app_gimbal.h"
+#include "app_attitude_link.h"
 #include "app_yaw_identification.h"
 
 #include "app_autoaim.h"
@@ -609,6 +610,7 @@ void Gimbal_Task(void const *argument)
     (void)DWT_GetDeltaT(&cycle);
     for (;;) {
         s_gimbal_dt_s = DWT_GetDeltaT(&cycle);
+        AttitudeLink_Service();
         GimbalPid_ApplyPcCommands();
         YawIdentApp_Pre();
         Tidy_send_vision(&visionDataSend);
@@ -623,6 +625,7 @@ void Gimbal_Task(void const *argument)
         GimbalYaw_Output();
         YawIdentApp_Post();
         GimbalCapture_Service();
+        AttitudeLink_Service();
         osDelay(1U);
     }
 }
