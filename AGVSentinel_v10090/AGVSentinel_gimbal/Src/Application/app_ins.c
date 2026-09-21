@@ -52,6 +52,7 @@ void Ins_Task(void const * argument) {
         INS_DiagLastDtS = dt;
         t += dt;
         if ((count % 1) == 0) {
+            const uint64_t sample_time_us = DWT_GetTimeline_us();
             BMI088_BMI088DecodeData();
             if (bmi088->state != BMI088_STATE_CONNECTED ||
                 !isfinite(dt) || dt <= 0.0f || dt > 0.01f) {
@@ -120,6 +121,8 @@ void Ins_Task(void const * argument) {
                 next.dt_s = dt;
                 next.sequence = s_ins_update_count;
                 next.tick_ms = s_ins_last_update_time;
+                next.sample_time_us = sample_time_us;
+                memcpy(next.q, INS.q, sizeof(next.q));
                 primask = __get_PRIMASK();
                 __disable_irq();
                 s_ins_observation = next;

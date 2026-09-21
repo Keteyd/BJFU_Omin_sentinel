@@ -59,6 +59,8 @@ extern INS_INSTypeDef INS;
 typedef struct {
     float yaw_deg, roll_deg, pitch_deg, gyro[3], dt_s;
     uint32_t sequence, tick_ms;
+    float q[4]; /* wxyz, corrected IMU body -> inertial; no Euler yaw -90 correction. */
+    uint64_t sample_time_us; /* Software read-start time, not a hardware sample timestamp. */
 } INS_Observation;
 void INS_ReadObservation(INS_Observation *observation);
 
