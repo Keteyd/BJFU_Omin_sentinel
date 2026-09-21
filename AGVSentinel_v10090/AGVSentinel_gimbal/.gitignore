@@ -1,0 +1,58 @@
+# Editors and user-specific settings
+.vscode/
+.vs/
+.idea/
+*.iml
+*.kwb
+*.watch
+*.uvguix.*
+*.uvoptx
+*.jdebug
+*.jdebug.user
+*.scvd
+JLinkLog.txt
+.DS_Store
+Thumbs.db
+
+# Keil and generic build directories
+Objects/
+Objects_*/
+Listings/
+build/
+Build/
+Debug/
+Release/
+obj/
+out/
+
+# Intermediate and generated files
+*.o
+*.d
+*.crf
+*.dep
+*.map
+*.lst
+*.bak
+*.sct
+*.iex
+*.lnp
+*.srec
+*.htm
+*.tmp
+*.log
+*.axf
+*.elf
+
+# Keep the checked-in CMSIS-DSP library only
+*.lib
+!Src/*.lib
+
+# Generated RTE content
+RTE/
+**/RTE/
+
+# Backup files
+*~
+*.swp
+*.orig
+.backup/
